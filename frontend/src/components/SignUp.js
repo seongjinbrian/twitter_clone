@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import axios from "axios";
+
 const OuterAuth = styled.div`
   display: flex;
   justify-content: center;
@@ -17,36 +19,40 @@ const InnerAuth = styled.div`
 `;
 
 function Signup() {
+  const register = (e) => {
+    e.preventDefault();
+    axios
+      .post("http://localhost:5000/api/register", {
+        email: document.getElementById("email").value,
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+      })
+      .then((res) => {
+        console.log(res.data);
+      });
+  };
   return (
     <OuterAuth>
       <InnerAuth>
-        <form>
+        <form onSubmit={register}>
           <h3>Sign Up</h3>
-
-          <div className="form-group">
-            <label>First name</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="First name"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Last name</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Last name"
-            />
-          </div>
-
           <div className="form-group">
             <label>Email address</label>
             <input
               type="email"
               className="form-control"
-              placeholder="Enter email"
+              placeholder="Type your email"
+              id="email"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Username</label>
+            <input
+              type="username"
+              className="form-control"
+              placeholder="Enter Username"
+              id="username"
             />
           </div>
 
@@ -55,16 +61,13 @@ function Signup() {
             <input
               type="password"
               className="form-control"
-              placeholder="Enter password"
+              placeholder="Enter Password"
+              id="password"
             />
           </div>
-
           <button type="submit" className="btn btn-primary btn-block">
             Sign Up
           </button>
-          <p className="forgot-password text-right">
-            Already registered <a href="#">sign in?</a>
-          </p>
         </form>
       </InnerAuth>
     </OuterAuth>

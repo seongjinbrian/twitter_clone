@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import axios from "axios";
+
 const OuterAuth = styled.div`
   display: flex;
   justify-content: center;
@@ -17,10 +19,21 @@ const InnerAuth = styled.div`
 `;
 
 function Login() {
+  const login = (e) => {
+    e.preventDefault();
+    axios
+      .post("http://localhost:5000/api/login", {
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+      })
+      .then((res) => {
+        console.log(res.data);
+      });
+  };
   return (
     <OuterAuth>
       <InnerAuth>
-        <form>
+        <form onSubmit={login}>
           <h3>Sign In</h3>
           <div className="form-group">
             <label>Email address</label>
@@ -28,6 +41,7 @@ function Login() {
               type="email"
               className="form-control"
               placeholder="Enter email"
+              id="email"
             />
           </div>
 
@@ -37,6 +51,7 @@ function Login() {
               type="password"
               className="form-control"
               placeholder="Enter password"
+              id="password"
             />
           </div>
 

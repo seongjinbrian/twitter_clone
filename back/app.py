@@ -1,11 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import Flask_cors import CORS
+import re
+
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///twitter.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'this is secret'
-
+CORS(app)
 db = SQLAlchemy(app)
 
 class Users(db.Model):
@@ -87,6 +90,88 @@ def delete_user():
             return jsonify({"error": "Invalid form"})
     except:
         return ({"error": "Invalid form"})
+
+def getUsers():
+    users = Users.query.all()
+    return [{"id": i.id, "username": i.username, "email": i.email, "password": i.password} for i in users]
+
+def add_user(username, email, password):
+    try:
+        if username and password and email:
+            try:
+                user = Users(username, email, password)
+                db.session.add(user)
+                db.session.commit()
+                status = 200
+                response = {
+                    "content": '등록 성공'
+                }
+            except Exception:
+                response = {
+                    'content': '등록 실패'
+                }
+                status = 500
+            finally: 
+                return response, status
+        else:
+            response = {
+                    'content': 'check your username, password, and an email'
+            }
+            status = 500
+            return response, status
+    except Exception:
+        response = {
+            'content': '등록 실패'
+        }
+        status = 500
+        return response, status
+
+def delete_user(id):
+    if id:
+        try:
+            user = Users.query.get(id)
+            db.session.delete(user)
+            db.session.commit()
+            return True
+        except Exception as e:
+            return False
+    else:
+        return False
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    try:
+        email = request.json["email"]
+        password = request.json["password"]
+        if (email and password):
+            users = getUsers()
+            # Check if user exists
+            return jsonify(len(list(filter(lambda x: x["email"] == email and x["password"] == password, users))) == 1)
+        else:
+            return jsonify({"error": "Invalid form"})
+    except:
+        return jsonify({"error": "Invalid form"})
+
+@app.route("/api/register", methods=["POST"])
+def register():
+    try:
+        email = request.json["email"]
+        email = email.lower()
+        password = request.json["password"]
+        username = request.json["username"]
+        users = getUsers()
+        if(len(list(filter(lambda x: x["email"] == email, users))) == 1):
+            return jsonify({"error": "User already exist"})
+        if not re.match(r"[\w\._]{5,}@\w{3,}.\w{2,4}", email):
+            return jsonify({"error": "not a email form"})
+        response, status = add_user(username, email, password)
+    except Exception:
+        response = {
+            "error": "Invalid format"
+        }
+        status = 500
+    finally:
+        return response, status
 
 if __name__ == "__main__":
     app.run(debug=True)

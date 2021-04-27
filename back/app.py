@@ -96,12 +96,12 @@ def remove_user():
 
 def getUsers():
     users = Users.query.all()
-    return [{"id": i.id, "username": i.username, "email": i.email, "password": i.password} for i in users]
+    return [{"id": user.id, "username": user.username, "email": user.email, "password": user.password} for user in users]
 
 def getUser(uid):
     users = Users.query.all()
     user = list(filter(lambda x: x.id == uid, users))[0]
-    return {"id": user.id, "username": user.username, "email": user.email, "password": user.pwd}
+    return {"id": user.id, "username": user.username, "email": user.email, "password": user.password}
 
 def add_user(username, email, password):
     try:
@@ -152,14 +152,26 @@ def login():
     try:
         email = request.json["email"]
         password = request.json["password"]
-        if (email and password):
+        if email and password:
             users = getUsers()
-            # Check if user exists
-            return jsonify(len(list(filter(lambda x: x["email"] == email and x["password"] == password, users))) == 1)
+            user = list(filter(lambda x: x["email"] == email and x["password"] == password, users))
+            if len(user) == 1:
+                access_token = create_access_token(identity=user[0]["id"])
+                return jsonify(access_token=access_token)
+            else:
+                return {
+                    "error":"Invalid"
+                }
         else:
             return jsonify({"error": "Invalid form"})
     except:
         return jsonify({"error": "Invalid form"})
+
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
 @app.route("/api/register", methods=["POST"])
 def register():
@@ -191,16 +203,17 @@ class Tweet(db.Model):
 
 def getTweets():
     tweets = Tweet.query.all()
-    return [{"id": i.id, "title": i.title, "content": i.content, "user": getUser(i.uid)} for i in tweets]
+    return [{"id": tweet.id, "title": tweet.title, "content": tweet.content, "user": getUser(tweet.uid)} for tweet in tweets]
 
 def getUserTweets(uid):
     tweets = Tweet.query.all()
     return [{"id": item.id, "userid": item.user_id, "title": item.title, "content": item.content} for item in filter(lambda i: i.user_id == uid, tweets)]
 
 def addTweet(title, content, uid):
-    if (title and content and uid):
+    if title and content and uid:
         try:
-            user = list(filter(lambda i: i.id == uid, User.query.all()))[0]
+            user = list(filter(lambda i: i.id == uid, Users.query.all()))[0]
+            print(user)
             twt = Tweet(title=title, content=content, user=user)
             db.session.add(twt)
             db.session.commit()
@@ -226,24 +239,36 @@ def get_tweets():
     return jsonify(getTweets())
 
 @app.route("/api/addtweet", methods=["POST"])
+# @jwt_required()
 def add_tweet():
     try:
         title = request.json["title"]
         content = request.json["content"]
         uid = request.json["uid"]
+        print(title, content, uid)
         addTweet(title, content, uid)
         return jsonify({"success": "true"})
     except Exception as e:
         print(e)
         return jsonify({"error": "Invalid form"})
-@app.route("/api/deletetweet", methods=["DELETE"])
+
+@app.route("/api/deletetweet",methods=["DELETE"])
+# @jwt_required()
 def delete_tweet():
     try:
-        tid = request.json["tid"]
-        delTweet(tid)
-        return jsonify({"success": "true"})
+        tweetId = request.json["tid"]
+        delTweet(tweetId)
+        response = {
+            "content": "등록 성공"
+        }
+        status = 200
+        return response, status
     except:
-        return jsonify({"error": "Invalid form"})
+        response = {
+            "content": "등록 실패"
+        }
+        status = 500
+        return response, status
 
 
 if __name__ == "__main__":

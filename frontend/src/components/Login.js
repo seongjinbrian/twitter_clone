@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import axios from "axios";
-
+import React, {useState, useEffect} from "react";
+import {login, check} from "../login"
 const OuterAuth = styled.div`
   display: flex;
   justify-content: center;
@@ -19,21 +20,29 @@ const InnerAuth = styled.div`
 `;
 
 function Login() {
-  const login = (e) => {
+  // useEffect(() => {
+  //   check().then(r => {if (r) {
+  //     window.location = "/"
+  // }})
+  // })
+  const [signIn, setSignin] = useState(false);
+  const loginEvent = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:5000/api/login", {
-        email: document.getElementById("email").value,
-        password: document.getElementById("password").value,
-      })
-      .then((res) => {
-        console.log(res.data);
-      });
+    login(document.getElementById("email").value, document.getElementById("password").value)
+    .then(status => {
+      if (status === true) {
+        setSignin(true)
+        window.location="/"
+      } else {
+        setSignin(false)
+      }
+    })
+    
   };
   return (
     <OuterAuth>
       <InnerAuth>
-        <form onSubmit={login}>
+        <form onSubmit={loginEvent}>
           <h3>Sign In</h3>
           <div className="form-group">
             <label>Email address</label>
@@ -71,8 +80,8 @@ function Login() {
           <button type="submit" className="btn btn-primary btn-block">
             Submit
           </button>
-          <p className="forgot-password text-right">
-            Forgot <a href="#">password?</a>
+          <p>
+          {signIn && "You're logged in!"}
           </p>
         </form>
       </InnerAuth>

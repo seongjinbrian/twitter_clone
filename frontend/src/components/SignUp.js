@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import axios from "axios";
-
+import React, {useState} from "react";
 const OuterAuth = styled.div`
   display: flex;
   justify-content: center;
@@ -19,18 +19,26 @@ const InnerAuth = styled.div`
 `;
 
 function Signup() {
+  const [signup, setSignup] = useState({"err": ""})
   const register = (e) => {
     e.preventDefault();
-    axios
-      .post("http://localhost:5000/api/register", {
-        email: document.getElementById("email").value,
-        username: document.getElementById("username").value,
-        password: document.getElementById("password").value,
-      })
-      .then((res) => {
-        console.log(res.data);
-      });
-  };
+    console.log("Hello")
+    axios.post("/api/register", {
+            email: document.getElementById("email").value,
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value,
+        })
+        .then((res) => {
+            console.log(res)
+            if (res.data.error) {
+                console.log('Hi')
+                setSignup({ err: res.data.error });
+            } else {
+                console.log('hi')
+                window.location = "/login"
+            }
+        });
+};
   return (
     <OuterAuth>
       <InnerAuth>

@@ -1,18 +1,35 @@
-import React from "react";
-import {logout} from "../login";
+import React, { useEffect } from "react";
+import { logout } from "../login";
+import { useCookies } from "react-cookie";
+import axios from "axios";
 
-class Logout extends React.Component {
-    componentDidMount() {
-        logout()
-    }
+function Logout() {
+  const [cookies, setCookie, removeCookie] = useCookies([
+    "access_token_cookie",
+  ]);
 
-    render() {
-        return (
-            <div className="w3-container w3-xlarge">
-                <p>Please wait, logging you out...</p>
-            </div>
-        )
+  function logout() {
+    if (cookies) {
+      axios.post("/api/logout", {}).then((res) => {
+        if (res.data.error) {
+          console.error(res.data.error);
+        } else {
+          return true;
+        }
+      });
+    } else {
+      console.log("error");
     }
+  }
+  useEffect(() => {
+    logout();
+  });
+
+  return (
+    <div className="w3-container w3-xlarge">
+      <p>Please wait, logging you out...</p>
+    </div>
+  );
 }
 
 export default Logout;

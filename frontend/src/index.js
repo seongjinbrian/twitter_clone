@@ -1,13 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import { CookiesProvider } from "react-cookie";
 
 ReactDOM.render(
-    <App />,
-  document.getElementById('root')
+  // <CookiesProvider>
+  <App />,
+  // </CookiesProvider>,
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function

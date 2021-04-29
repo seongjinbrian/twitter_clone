@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import axios from "axios";
-import React, {useState, useEffect} from "react";
-import {login, check} from "../login"
+import React, { useState, useEffect } from "react";
+import Check from "../login";
 const OuterAuth = styled.div`
   display: flex;
   justify-content: center;
@@ -25,19 +25,29 @@ function Login() {
   //     window.location = "/"
   // }})
   // })
+  async function login(email, password) {
+    const res = await axios.post("/api/login", { email, password });
+    const { data } = await res;
+    if (data.error) {
+      return data.error;
+    } else {
+      return true;
+    }
+  }
   const [signIn, setSignin] = useState(false);
   const loginEvent = (e) => {
     e.preventDefault();
-    login(document.getElementById("email").value, document.getElementById("password").value)
-    .then(status => {
+    login(
+      document.getElementById("email").value,
+      document.getElementById("password").value
+    ).then((status) => {
       if (status === true) {
-        setSignin(true)
-        window.location="/"
+        // cookies.get('name')
+        window.location = "/";
       } else {
-        setSignin(false)
+        setSignin(false);
       }
-    })
-    
+    });
   };
   return (
     <OuterAuth>
@@ -80,9 +90,7 @@ function Login() {
           <button type="submit" className="btn btn-primary btn-block">
             Submit
           </button>
-          <p>
-          {signIn && "You're logged in!"}
-          </p>
+          <p>{signIn && "You're logged in!"}</p>
         </form>
       </InnerAuth>
     </OuterAuth>

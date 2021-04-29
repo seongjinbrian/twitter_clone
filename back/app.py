@@ -2,16 +2,32 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import re
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies, create_refresh_token
 
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///twitter.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'this is secret'
+app.config["JWT_COOKIE_SECURE"] = False
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 CORS(app)
-JWTManager(app)
+jwt = JWTManager(app)
 db = SQLAlchemy(app)
+
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original respone
+        return response
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -157,21 +173,47 @@ def login():
             user = list(filter(lambda x: x["email"] == email and x["password"] == password, users))
             if len(user) == 1:
                 access_token = create_access_token(identity=user[0]["id"])
-                return jsonify(access_token=access_token)
+                refresh_token = create_refresh_token(identity=user[0]["id"])
+                response = jsonify(access_token=access_token, refresh_token=refresh_token)
+                set_access_cookies(response, access_token)
+                return response
+                # access_token = create_access_token(identity=user[0]["id"])
+                # return jsonify(access_token=access_token)
             else:
                 return {
                     "error":"Invalid"
                 }
         else:
             return jsonify({"error": "Invalid form"})
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({"error": "Invalid form"})
+@app.route("/api/logout", methods=["POST"])
+def logout():
+    response = jsonify({"msg": "logout successful"})
+    unset_jwt_cookies(response)
+    return response
 
-@app.route("/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original respone
+        return response
+
+# @app.route("/protected", methods=["GET"])
+# @jwt_required()
+# def protected():
+#     current_user = get_jwt_identity()
+#     return jsonify(logged_in_as=current_user), 200
 
 @app.route("/api/register", methods=["POST"])
 def register():
@@ -270,6 +312,11 @@ def delete_tweet():
         status = 500
         return response, status
 
+# @app.route("/logout", methods=["POST"])
+# def logout():
+#     response = jsonify({"msg": "logout successful"})
+#     unset_jwt_cookies(response)
+#     return response
 
 if __name__ == "__main__":
     app.run(debug=True)

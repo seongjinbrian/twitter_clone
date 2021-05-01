@@ -1,45 +1,43 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from "react";
 import AddTweet from "./AddTweet";
 import TweetItem from "./Tweets";
 import axios from "axios";
-import {Button, Modal} from 'react-bootstrap'
+import { Button, Modal } from "react-bootstrap";
 
 function Main() {
-    const [show, setShow] = useState(false);
-    const [state, setState] = useState({tweets: []})
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-    useEffect(() => {
-        axios.get("/api/tweets").then(res => {
-            setState({tweets: res.data.reverse()})
-        });
-      }, []);
-    return(
-        <>
-            <Button variant="primary" onClick={handleShow}>
-                Post tweet
-            </Button>
-            <Modal
-        show={show}
-        onHide={handleClose}
-        backdrop="static"
-        keyboard={false}
+  const [state, setState] = useState({ tweets: [] });
+  useEffect(() => {
+    axios.get("/api/tweets").then((res) => {
+      setState({ tweets: res.data.reverse() });
+    });
+  }, []);
+  return (
+    <React.Fragment>
+      <div
+        className="w3-container w3-jumbo"
+        style={{ margin: "3rem", paddingLeft: "1rem" }}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Modal title</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          I will not close if you click outside me. Don't even try to press
-          escape key.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="primary">Understood</Button>
-        </Modal.Footer>
-      </Modal>
-        </>
-    )
+        Tweets
+      </div>
+      <AddTweet />
+      <div className="w3-container">
+        {state.tweets.length === 0 ? (
+          <p className="w3-xlarge w3-opacity" style={{ marginLeft: "2rem" }}>
+            No tweets! Create one
+          </p>
+        ) : (
+          state.tweets.map((item, index) => {
+            return (
+              <TweetItem
+                title={item.title}
+                content={item.content}
+                key={index}
+              />
+            );
+          })
+        )}
+      </div>
+    </React.Fragment>
+  );
 }
 export default Main;

@@ -16,7 +16,7 @@ function App() {
     <CookiesProvider>
       <Header />
       <Router>
-        <Route path="/" exact component={Check ? Main : Home} />
+        <Route path="/" exact component={Check() ? Main : Home} />
         <Route path="/login" exact component={Login} />
         <Route path="/signup" exact component={Signup} />
         <Route path="/logout" exact component={Logout} />

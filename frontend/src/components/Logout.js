@@ -9,11 +9,13 @@ function Logout() {
   ]);
 
   function logout() {
+    console.log(cookies);
     if (cookies) {
       axios.post("/api/logout", {}).then((res) => {
         if (res.data.error) {
           console.error(res.data.error);
         } else {
+          window.location = "/";
           return true;
         }
       });

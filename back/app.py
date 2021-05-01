@@ -281,12 +281,12 @@ def get_tweets():
     return jsonify(getTweets())
 
 @app.route("/api/addtweet", methods=["POST"])
-# @jwt_required()
+@jwt_required()
 def add_tweet():
     try:
         title = request.json["title"]
         content = request.json["content"]
-        uid = request.json["uid"]
+        uid = get_jwt_identity()
         print(title, content, uid)
         addTweet(title, content, uid)
         return jsonify({"success": "true"})

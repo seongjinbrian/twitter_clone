@@ -3,7 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import re
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies, create_refresh_token
-
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///twitter.db"
@@ -14,20 +16,6 @@ app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 CORS(app)
 jwt = JWTManager(app)
 db = SQLAlchemy(app)
-
-@app.after_request
-def refresh_expiring_jwts(response):
-    try:
-        exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(timezone.utc)
-        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
-        if target_timestamp > exp_timestamp:
-            access_token = create_access_token(identity=get_jwt_identity())
-            set_access_cookies(response, access_token)
-        return response
-    except (RuntimeError, KeyError):
-        # Case where there is not a valid JWT. Just return the original respone
-        return response
 
 class Users(db.Model):
     __tablename__ = 'users'
@@ -266,9 +254,9 @@ def addTweet(title, content, uid):
     else:
         return False
 
-def delTweet(tid):
+def delTweet(tweetId):
     try:
-        tweet = Tweet.query.get(tid)
+        tweet = Tweet.query.get(tweetId)
         db.session.delete(tweet)
         db.session.commit()
         return True
@@ -281,12 +269,13 @@ def get_tweets():
     return jsonify(getTweets())
 
 @app.route("/api/addtweet", methods=["POST"])
-@jwt_required()
+# @jwt_required()
 def add_tweet():
     try:
         title = request.json["title"]
         content = request.json["content"]
-        uid = get_jwt_identity()
+        print(title, content)
+        uid = request.json["uid"]
         print(title, content, uid)
         addTweet(title, content, uid)
         return jsonify({"success": "true"})
@@ -294,11 +283,20 @@ def add_tweet():
         print(e)
         return jsonify({"error": "Invalid form"})
 
-@app.route("/api/deletetweet",methods=["DELETE"])
-# @jwt_required()
-def delete_tweet():
+@app.route("/api/uid", methods=["GET"])
+@jwt_required()
+def add_tweets():
     try:
-        tweetId = request.json["tid"]
+        hello = get_jwt_identity()
+        response = {"uid": hello}
+        return response, 200
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Invalid form"})
+
+@app.route("/api/deletetweet/<tweetId>", methods=["DELETE"])
+def delete_tweet(tweetId):
+    try:
         delTweet(tweetId)
         response = {
             "content": "등록 성공"

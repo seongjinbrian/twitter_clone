@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Editor } from "@tinymce/tinymce-react/lib/cjs/main/ts";
 import axios from "axios";
-import Cookies from "universal-cookie";
 import { Form, Button, Modal } from "react-bootstrap";
+import styled from "styled-components";
+
+const Msg = styled.p`
+  display: inline;
+  padding-top: 1em;
+  padding-right: 1em;
+  justify-content: center;
+`;
+
 function AddTweet() {
   const [currentUser, setCurrentUser] = useState(0);
   useEffect(() => {
@@ -40,6 +48,7 @@ function AddTweet() {
 
   return (
     <>
+      <Msg>Share your thoughts</Msg>
       <Button variant="primary" onClick={handleShow}>
         Post tweet
       </Button>

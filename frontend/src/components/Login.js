@@ -42,7 +42,6 @@ function Login() {
       document.getElementById("password").value
     ).then((status) => {
       if (status === true) {
-        // cookies.get('name')
         window.location = "/";
       } else {
         setSignin(false);

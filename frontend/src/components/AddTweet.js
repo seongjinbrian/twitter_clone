@@ -1,14 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Editor } from "@tinymce/tinymce-react/lib/cjs/main/ts";
 import axios from "axios";
-import { useCookies } from "react-cookie";
-import { Form, Row, Button, Modal } from "react-bootstrap";
+import Cookies from "universal-cookie";
+import { Form, Button, Modal } from "react-bootstrap";
 function AddTweet() {
+  const [currentUser, setCurrentUser] = useState(0);
+  useEffect(() => {
+    axios.get("/api/uid").then((res) => {
+      setCurrentUser(res.data["uid"]);
+    });
+  }, [currentUser]);
+  console.log(currentUser);
+
   const [state, setState] = useState({ content: "" });
   const [show, setShow] = useState(false);
-  const [cookies, setCookie, removeCookie] = useCookies([
-    "access_token_cookie",
-  ]);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleEditorChange = (content, editor) => {
@@ -19,18 +24,11 @@ function AddTweet() {
     e.preventDefault();
     console.log(document.getElementById("title").value, state.content);
     axios
-      .post(
-        "http://localhost:5000/api/addtweet",
-        {
-          title: document.getElementById("title").value,
-          content: state.content,
-        },
-        {
-          headers: {
-            Authorization: "Bearer " + cookies,
-          },
-        }
-      )
+      .post("api/addtweet", {
+        title: document.getElementById("title").value,
+        content: state.content,
+        uid: currentUser,
+      })
       .then((res) => {
         if (res.data.success) {
           window.location.reload();

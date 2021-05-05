@@ -1,5 +1,5 @@
-from app import create_app
-
+from app import create_app, engine
+from app.domain import Base
 app = create_app()
 
 # Press the green button in the gutter to run the script.

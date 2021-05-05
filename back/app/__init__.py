@@ -6,7 +6,7 @@ from flask_cors import CORS
 import re
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt, set_access_cookies, unset_jwt_cookies, create_refresh_token
 from datetime import datetime, timedelta, timezone
-from app.domain.__init__ import Base 
+from app.domain import Base 
 from sqlalchemy import Column, Date, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -15,24 +15,6 @@ engine = create_engine('sqlite:///twitter.db')
 
 #Session
 Session = scoped_session(sessionmaker(autocommit=False, bind=engine))
-
-def create_tb():
-    class Users(Base):
-        __tablename__ = 'users'
-        id: int = Column(Integer, primary_key = True) 
-        username: str = Column(String(24), nullable=False)
-        email: str = Column(String(64), nullable=False)
-        password: str = Column(String(64), nullable=False)
-
-    class Tweet(Base):
-        __tablename__ = 'tweet'
-        id = Column(Integer, primary_key=True)
-        uid = Column(Integer, ForeignKey("users.id"))
-        user = relationship('Users', foreign_keys=uid)
-        title = Column(String(256))
-        content = Column(String(2048))
-    
-    Base.metadata.create_all(engine)
 
 def create_app():
     app = Flask(__name__)
@@ -49,20 +31,8 @@ def create_app():
     app.config["JWT_SECRET_KEY"] = "super-secret"
     jwt = JWTManager(app)
 
-    class Users(Base):
-        __tablename__ = 'users'
-        id: int = Column(Integer, primary_key = True) 
-        username: str = Column(String(24), nullable=False)
-        email: str = Column(String(64), nullable=False)
-        password: str = Column(String(64), nullable=False)
-
-    class Tweet(Base):
-        __tablename__ = 'tweet'
-        id = Column(Integer, primary_key=True)
-        uid = Column(Integer, ForeignKey("users.id"))
-        user = relationship('Users', foreign_keys=uid)
-        title = Column(String(256))
-        content = Column(String(2048))
+    from app.domain.user.user import Users
+    from app.domain.twitter.twitter import Tweet
     
     Base.metadata.create_all(engine)
     

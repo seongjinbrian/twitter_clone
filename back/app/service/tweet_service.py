@@ -27,5 +27,6 @@ class TweetService:
         try:
             self.repo.delete_tweet(tid)
             return True
-        except:
+        except Exception as e:
+            print(e)
             raise e

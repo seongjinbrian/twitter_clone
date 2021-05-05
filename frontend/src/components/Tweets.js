@@ -32,13 +32,13 @@ function TweetItem(props) {
         </Card.Text>
       </Card.Body>
       <Card.Footer>
-        <Button variant="link" onClick={() => removeTweet(props.id)}>
+        <Button variant="link">
           Like
         </Button>
-        <Button variant="link" onClick={() => removeTweet(props.id)}>
+        <Button variant="link">
           Comment
         </Button>
-        <Button variant="link" onClick={() => removeTweet(props.id)}>
+        <Button variant="link">
           Reply
         </Button>
         {props.ownership && (

@@ -4,7 +4,6 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 const token = cookies.get("csrf_access_token") || null;
-console.log(token);
 let firstItem = {
   navItem: token ? "Settings" : "Login",
   link: token ? "/settings" : "/login",

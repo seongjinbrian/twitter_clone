@@ -14,11 +14,10 @@ const Msg = styled.p`
 function AddTweet() {
   const [currentUser, setCurrentUser] = useState(0);
   useEffect(() => {
-    axios.get("/api/uid").then((res) => {
+    axios.get("/api/tweet/uid").then((res) => {
       setCurrentUser(res.data["uid"]);
     });
-  }, [currentUser]);
-  console.log(currentUser);
+  }, []);
 
   const [state, setState] = useState({ content: "" });
   const [show, setShow] = useState(false);
@@ -41,7 +40,7 @@ function AddTweet() {
         if (res.data.success) {
           window.location.reload();
         } else {
-          console.log("This not working");
+          console.log("cannot proceed your request");
         }
       });
   };

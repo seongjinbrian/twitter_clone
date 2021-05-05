@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
-import Check from "../login";
+
 const OuterAuth = styled.div`
   display: flex;
   justify-content: center;
@@ -20,13 +20,8 @@ const InnerAuth = styled.div`
 `;
 
 function Login() {
-  // useEffect(() => {
-  //   check().then(r => {if (r) {
-  //     window.location = "/"
-  // }})
-  // })
   async function login(email, password) {
-    const res = await axios.post("/api/login", { email, password });
+    const res = await axios.post("/api/user/login", { email, password });
     const { data } = await res;
     if (data.error) {
       return data.error;
@@ -42,7 +37,6 @@ function Login() {
       document.getElementById("password").value
     ).then((status) => {
       if (status === true) {
-        // cookies.get('name')
         window.location = "/";
       } else {
         setSignin(false);

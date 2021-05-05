@@ -1,22 +1,16 @@
 import Axios from "axios";
 import { useCookies } from "react-cookie";
 import React, { useState, useEffect } from "react";
+import Cookies from "universal-cookie";
 
 const Check = () => {
-  const [cookies, setCookie, removeCookie] = useCookies([
-    "access_token_cookie",
-  ]);
-  console.log(cookies);
-  if (cookies) {
-    return true;
-  } else {
-    return false;
+  const cookies = new Cookies();
+  const myCookie = cookies.get("csrf_access_token") || null; // Pacman
+  let isCookie = true;
+  if (myCookie == null) {
+    isCookie = false;
   }
+  return isCookie;
 };
-// function check() {
-//   const [cookies, setCookie, removeCookie] = useCookies([
-//     "access_token_cookie",
-//   ]);
-// }
 
 export default Check;

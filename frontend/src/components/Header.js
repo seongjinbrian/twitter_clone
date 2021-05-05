@@ -1,8 +1,18 @@
 import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
-// const Nav = styled.div`
-//     color: black;
-// `;
+import Cookies from "universal-cookie";
+
+const cookies = new Cookies();
+const token = cookies.get("csrf_access_token") || null;
+console.log(token);
+let firstItem = {
+  navItem: token ? "Settings" : "Login",
+  link: token ? "/settings" : "/login",
+};
+let secondItem = {
+  navItem: token ? "Logout" : "Register",
+  link: token ? "/logout" : "/signup",
+};
 function Header() {
   return (
     <div>
@@ -11,10 +21,10 @@ function Header() {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto"></Nav>
-          <Nav.Link href="/login" className="mr-sm-2">
-            Login
+          <Nav.Link href={firstItem.link} className="mr-sm-2">
+            {firstItem.navItem}
           </Nav.Link>
-          <Nav.Link href="/signup">Register</Nav.Link>
+          <Nav.Link href={secondItem.link}>{secondItem.navItem}</Nav.Link>
         </Navbar.Collapse>
       </Navbar>
     </div>

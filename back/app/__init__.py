@@ -11,7 +11,7 @@ from sqlalchemy import Column, Date, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 #DB connection
-engine = create_engine('sqlite:///twitter.db')
+engine = create_engine('sqlite:///twitter.db?check_same_thread=false')
 
 #Session
 Session = scoped_session(sessionmaker(autocommit=False, bind=engine))
